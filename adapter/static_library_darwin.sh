@@ -9,7 +9,7 @@ function push() {
 outputName=$1
 shift;
 
-push "process.o"
+push "library.o"
 push "$O3/deps/mbedtls/mbedtls-osx/library/libmbedtls.a"
 push "$O3/deps/lz4/lz4-osx/lib/liblz4.a"
 

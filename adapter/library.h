@@ -1,5 +1,5 @@
-#ifndef __PROCESS_H__
-#define __PROCESS_H__
+#ifndef __LIBRARY_H__
+#define __LIBRARY_H__
 
 #ifdef __cplusplus
 extern "C" {
@@ -29,9 +29,13 @@ typedef struct {
 
 typedef void(*event_callback)(user_data, conn_event);
 
+typedef struct {
+    const char * username;
+    const char * password;
+} user_credentials;
 
 //creates new session - nil on error,
-void *new_session(const char * profile_content , user_data userData , stats_callback statsCallback, log_callback, event_callback);
+void *new_session(const char * profile_content, user_credentials credentials, user_data userData , stats_callback statsCallback, log_callback, event_callback);
 
 //starts created session
 int start_session(void *ptr);

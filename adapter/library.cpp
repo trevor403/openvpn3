@@ -1,4 +1,4 @@
-#include "process.h"
+#include "library.h"
 
 #include <string>
 #include <iostream>
@@ -113,7 +113,7 @@ private:
 
 
 
-void * new_session(const char *profile_content, user_data userData, stats_callback statsCallback, log_callback logCallback, event_callback eventCallback) {
+void * new_session(const char *profile_content, user_credentials credentials , user_data userData, stats_callback statsCallback, log_callback logCallback, event_callback eventCallback) {
 
     Client * clientPtr = NULL;
 
@@ -140,10 +140,10 @@ void * new_session(const char *profile_content, user_data userData, stats_callba
             OPENVPN_THROW_EXCEPTION("eval config error: " << eval.message);
         }
 
-        //TODO username, password?
+
         ClientAPI::ProvideCreds creds;
-        creds.username = "testuser";
-        creds.password = "testpassword";
+        creds.username = credentials.username;
+        creds.password = credentials.password;
         ClientAPI::Status creds_status = clientPtr->provide_creds(creds);
         if (creds_status.error) {
             OPENVPN_THROW_EXCEPTION("creds error: " << creds_status.message);
@@ -187,5 +187,4 @@ void cleanup_session(void *ptr) {
 void check_library(user_data userData, log_callback logCallback) {
     logCallback(userData, (char *)ClientAPI::OpenVPNClient::platform().c_str());
     logCallback(userData, (char *)ClientAPI::OpenVPNClient::copyright().c_str());
-    logCallback(userData, (char *)ClientAPI::OpenVPNClient::crypto_self_test().c_str());
 }
