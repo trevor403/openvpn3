@@ -13,20 +13,6 @@
 #include <ApplicationServices/ApplicationServices.h>
 #endif
 
-// If enabled, don't direct ovpn3 core logging to
-// ClientAPI::OpenVPNClient::log() virtual method.
-// Instead, logging will go to LogBaseSimple::log().
-// In this case, make sure to define:
-//   LogBaseSimple log;
-// at the top of your main() function to receive
-// log messages from all threads.
-// Also, note that the OPENVPN_LOG_GLOBAL setting
-// MUST be consistent across all compilation units.
-#ifdef OPENVPN_USE_LOG_BASE_SIMPLE
-#define OPENVPN_LOG_GLOBAL // use global rather than thread-local log object pointer
-#include <openvpn/log/logbasesimple.hpp>
-#endif
-
 // don't export core symbols
 #define OPENVPN_CORE_API_VISIBILITY_HIDDEN
 
@@ -126,14 +112,10 @@ private:
 };
 
 
-int
-initProcess(const char *profile_content, user_data userData, stats_callback statsCallback, log_callback logCallback, event_callback eventCallback) {
 
-    int ret = 0;
+void * new_session(const char *profile_content, user_data userData, stats_callback statsCallback, log_callback logCallback, event_callback eventCallback) {
 
-#ifdef OPENVPN_LOG_LOGBASE_H
-    LogBaseSimple log;
-#endif
+    Client * clientPtr = NULL;
 
     try {
         Client::init_process();
@@ -147,13 +129,13 @@ initProcess(const char *profile_content, user_data userData, stats_callback stat
         config.disableClientCert = true;  //we don't use certs for client identification
 
 
-        Client client;
-        client.userData = userData;
-        client.logCallback = logCallback;
-        client.statsCallback = statsCallback;
-        client.eventCallback = eventCallback;
+        clientPtr = new Client();
+        clientPtr->userData = userData;
+        clientPtr->logCallback = logCallback;
+        clientPtr->statsCallback = statsCallback;
+        clientPtr->eventCallback = eventCallback;
 
-        const ClientAPI::EvalConfig eval = client.eval_config(config);
+        const ClientAPI::EvalConfig eval = clientPtr->eval_config(config);
         if (eval.error) {
             OPENVPN_THROW_EXCEPTION("eval config error: " << eval.message);
         }
@@ -162,28 +144,47 @@ initProcess(const char *profile_content, user_data userData, stats_callback stat
         ClientAPI::ProvideCreds creds;
         creds.username = "testuser";
         creds.password = "testpassword";
-        ClientAPI::Status creds_status = client.provide_creds(creds);
+        ClientAPI::Status creds_status = clientPtr->provide_creds(creds);
         if (creds_status.error) {
             OPENVPN_THROW_EXCEPTION("creds error: " << creds_status.message);
         }
 
-        ClientAPI::Status connect_status = client.connect();
-        if (connect_status.error) {
-            OPENVPN_THROW_EXCEPTION("connect error: " << connect_status.message);
-        }
-        logCallback(userData, "Openvpn client finished");
     }
     catch (const std::exception &e) {
         logCallback(userData, (char *)(e.what()));
-        ret = 1;
+        if(clientPtr != NULL) {
+            delete clientPtr;
+            clientPtr = NULL;
+        }
     }
 
-    Client::uninit_process();
 
-    return ret;
+    return clientPtr;
 }
 
-void checkLibrary(user_data userData, log_callback logCallback) {
+int start_session(void *ptr) {
+    Client *client = (Client *)(ptr);
+    ClientAPI::Status connect_status = client->connect();
+    if (connect_status.error) {
+        client->logCallback(client->userData, (char *)connect_status.message.c_str());
+        return 1;
+    }
+    client->logCallback(client->userData, "Openvpn3 session ended");
+    return 0;
+}
+
+void stop_session(void *ptr) {
+    Client *client = (Client *)(ptr);
+    client->stop();
+}
+
+void cleanup_session(void *ptr) {
+    Client *client = (Client *)(ptr);
+    delete client;
+    Client::uninit_process();
+}
+
+void check_library(user_data userData, log_callback logCallback) {
     logCallback(userData, (char *)ClientAPI::OpenVPNClient::platform().c_str());
     logCallback(userData, (char *)ClientAPI::OpenVPNClient::copyright().c_str());
     logCallback(userData, (char *)ClientAPI::OpenVPNClient::crypto_self_test().c_str());

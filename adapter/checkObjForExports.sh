@@ -1,3 +1,3 @@
 #!/bin/bash
 
-objdump -t process.o | grep _initProcess
+nm $1 | grep _new_session
