@@ -80,7 +80,10 @@ private:
     }
 
     virtual void clock_tick() override {
+        ClientAPI::TransportStats trStats = transport_stats();
         conn_stats stats;
+        stats.bytes_in = trStats.bytesIn;
+        stats.bytes_out = trStats.bytesOut;
         statsCallback(userData, stats);
     }
 
@@ -127,6 +130,9 @@ void * new_session(const char *profile_content, user_credentials credentials , u
         config.info = true;
         config.clockTickMS = 1000;   //ticks every 1 sec
         config.disableClientCert = true;  //we don't use certs for client identification
+        config.connTimeout = 10; // connection timeout - 10 seconds (make it configurable?)
+        config.tunPersist = true;
+        config.compressionMode = "yes";
 
 
         clientPtr = new Client();
