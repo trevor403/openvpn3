@@ -186,6 +186,10 @@ if [ "$APPLE_FAMILY" = "1" ]; then
     LIBS="$LIBS -framework CoreFoundation -framework SystemConfiguration -framework IOKit -framework ApplicationServices"
 fi
 
+if [ "$PROF" = "mingw" ]; then
+    LIBS="$LIBS -lws2_32 -liphlpapi"
+fi
+
 # boost
 #CPPFLAGS="$CPPFLAGS -I$DEP_DIR/boost"
 #LIBS="$LIBS -lboost_system"
