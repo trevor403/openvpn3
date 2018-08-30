@@ -49,19 +49,19 @@ using namespace openvpn;
 class Client : public ClientAPI::OpenVPNClient {
 public:
 
-    //hooks for callbacking go integration bidings
-    user_data userData;
+    Client(const callbacks_delegate &callbacks) {
+        this->callbacks = callbacks;
+    }
 
-    log_callback logCallback;
-
-    stats_callback statsCallback;
-
-    event_callback eventCallback;
-
-
+    void LogMessage(const char * msg) {
+        callbacks.logCallback(callbacks.usrData, (char *)msg);
+    }
 private:
+
+    callbacks_delegate callbacks;
+
     virtual bool socket_protect(int socket) override {
-        logCallback(userData, "Socket protect called (Noop)");
+        LogMessage("Socket protect called (Noop)");
         return true;
     }
 
@@ -72,11 +72,11 @@ private:
         myEvent.fatal = ev.fatal;
         myEvent.name = (char *) ev.name.c_str();
         myEvent.info = (char *) ev.info.c_str();
-        eventCallback(userData, myEvent);
+        callbacks.eventCallback(callbacks.usrData, myEvent);
     }
 
     virtual void log(const ClientAPI::LogInfo &log) override {
-        logCallback(userData, (char *)log.text.c_str());
+        callbacks.logCallback(callbacks.usrData, (char *)log.text.c_str());
     }
 
     virtual void clock_tick() override {
@@ -84,7 +84,7 @@ private:
         conn_stats stats;
         stats.bytes_in = trStats.bytesIn;
         stats.bytes_out = trStats.bytesOut;
-        statsCallback(userData, stats);
+        callbacks.statsCallback(callbacks.usrData, stats);
     }
 
     virtual void external_pki_cert_request(ClientAPI::ExternalPKICertRequest &certreq) override {
@@ -116,7 +116,7 @@ private:
 
 
 
-void * new_session(const char *profile_content, user_credentials credentials , user_data userData, stats_callback statsCallback, log_callback logCallback, event_callback eventCallback) {
+void * new_session(const char *profile_content, user_credentials credentials , callbacks_delegate callbacks) {
 
     Client * clientPtr = NULL;
 
@@ -135,11 +135,7 @@ void * new_session(const char *profile_content, user_credentials credentials , u
         config.compressionMode = "yes";
 
 
-        clientPtr = new Client();
-        clientPtr->userData = userData;
-        clientPtr->logCallback = logCallback;
-        clientPtr->statsCallback = statsCallback;
-        clientPtr->eventCallback = eventCallback;
+        clientPtr = new Client(callbacks);
 
         const ClientAPI::EvalConfig eval = clientPtr->eval_config(config);
         if (eval.error) {
@@ -157,11 +153,13 @@ void * new_session(const char *profile_content, user_credentials credentials , u
 
     }
     catch (const std::exception &e) {
-        logCallback(userData, (char *)(e.what()));
+        callbacks.logCallback(callbacks.usrData, (char *)(e.what()));
+        //TODO auto pointer ?
         if(clientPtr != NULL) {
             delete clientPtr;
             clientPtr = NULL;
         }
+        Client::uninit_process();
     }
 
 
@@ -172,10 +170,10 @@ int start_session(void *ptr) {
     Client *client = (Client *)(ptr);
     ClientAPI::Status connect_status = client->connect();
     if (connect_status.error) {
-        client->logCallback(client->userData, (char *)connect_status.message.c_str());
+        client->LogMessage(connect_status.message.c_str());
         return 1;
     }
-    client->logCallback(client->userData, "Openvpn3 session ended");
+    client->LogMessage("Openvpn3 session ended");
     return 0;
 }
 
