@@ -1,56 +1,17 @@
 #include "library.h"
+#include "tunsetup.h"
 
-#include <string>
-#include <iostream>
-#include <thread>
-#include <memory>
-#include <mutex>
+#include "tunsetup_impl.hpp"
 
-#include <openvpn/common/platform.hpp>
-
-#ifdef OPENVPN_PLATFORM_MAC
-#include <CoreFoundation/CFBundle.h>
-#include <ApplicationServices/ApplicationServices.h>
-#endif
-
-// don't export core symbols
-#define OPENVPN_CORE_API_VISIBILITY_HIDDEN
-
-// should be included before other openvpn includes,
-// with the exception of openvpn/log includes
-#include <client/ovpncli.cpp>
-
-#include <openvpn/common/exception.hpp>
-#include <openvpn/common/string.hpp>
-#include <openvpn/common/signal.hpp>
-#include <openvpn/common/file.hpp>
-#include <openvpn/common/getopt.hpp>
-#include <openvpn/common/getpw.hpp>
-#include <openvpn/common/cleanup.hpp>
-#include <openvpn/time/timestr.hpp>
-#include <openvpn/ssl/peerinfo.hpp>
-#include <openvpn/ssl/sslchoose.hpp>
-
-#ifdef OPENVPN_REMOTE_OVERRIDE
-#include <openvpn/common/process.hpp>
-#endif
-
-#if defined(USE_MBEDTLS)
-#include <openvpn/mbedtls/util/pkcs1.hpp>
-#endif
-
-#if defined(OPENVPN_PLATFORM_WIN)
-#include <openvpn/win/console.hpp>
-#endif
-
-using namespace openvpn;
-
-
-class Client : public ClientAPI::OpenVPNClient {
+class Client : public TunBuilderDelegate {
 public:
 
-    Client(const callbacks_delegate &callbacks) {
+    Client(const callbacks_delegate &callbacks, const tun_builder_callbacks &builder_callbacks) : TunBuilderDelegate(builder_callbacks) {
         this->callbacks = callbacks;
+    }
+
+    virtual ~Client() {
+
     }
 
     void LogMessage(const char * msg) {
@@ -116,7 +77,7 @@ private:
 
 
 
-void * new_session(const char *profile_content, user_credentials credentials , callbacks_delegate callbacks) {
+void * new_session(const char *profile_content, user_credentials credentials , callbacks_delegate callbacks, tun_builder_callbacks builder_callbacks) {
 
     Client * clientPtr = NULL;
 
@@ -135,7 +96,7 @@ void * new_session(const char *profile_content, user_credentials credentials , c
         config.compressionMode = "yes";
 
 
-        clientPtr = new Client(callbacks);
+        clientPtr = new Client(callbacks, builder_callbacks);
 
         const ClientAPI::EvalConfig eval = clientPtr->eval_config(config);
         if (eval.error) {
@@ -188,7 +149,7 @@ void cleanup_session(void *ptr) {
     Client::uninit_process();
 }
 
-void check_library(user_data userData, log_callback logCallback) {
+void check_library(user_callback_data userData, log_callback logCallback) {
     logCallback(userData, (char *)ClientAPI::OpenVPNClient::platform().c_str());
     logCallback(userData, (char *)ClientAPI::OpenVPNClient::copyright().c_str());
 }
