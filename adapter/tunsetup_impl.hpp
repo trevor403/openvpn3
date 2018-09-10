@@ -28,7 +28,6 @@
 #include <openvpn/common/signal.hpp>
 #include <openvpn/common/file.hpp>
 #include <openvpn/common/getopt.hpp>
-#include <openvpn/common/getpw.hpp>
 #include <openvpn/common/cleanup.hpp>
 #include <openvpn/time/timestr.hpp>
 #include <openvpn/ssl/peerinfo.hpp>
