@@ -77,28 +77,27 @@ private:
 
 
 
-void * new_session(const char *profile_content, user_credentials credentials , callbacks_delegate callbacks, tun_builder_callbacks builder_callbacks) {
+void * new_session(config config, user_credentials credentials , callbacks_delegate callbacks, tun_builder_callbacks builder_callbacks) {
 
     Client * clientPtr = NULL;
 
     try {
         Client::init_process();
 
-        ClientAPI::Config config;
-        config.guiVersion = "cli 1.0";
-        config.content = profile_content;
-
-        config.info = true;
-        config.clockTickMS = 1000;   //ticks every 1 sec
-        config.disableClientCert = true;  //we don't use certs for client identification
-        config.connTimeout = 10; // connection timeout - 10 seconds (make it configurable?)
-        config.tunPersist = true;
-        config.compressionMode = "yes";
+        ClientAPI::Config config_api;
+        config_api.content = config.profileContent;
+        config_api.guiVersion = config.guiVersion;
+        config_api.info = config.info;
+        config_api.clockTickMS = config.clockTickMS;
+        config_api.disableClientCert = config.disableClientCert;
+        config_api.connTimeout = config.connTimeout;
+        config_api.tunPersist = config.tunPersist;
+        config_api.compressionMode = config.compressionMode;
 
 
         clientPtr = new Client(callbacks, builder_callbacks);
 
-        const ClientAPI::EvalConfig eval = clientPtr->eval_config(config);
+        const ClientAPI::EvalConfig eval = clientPtr->eval_config(config_api);
         if (eval.error) {
             OPENVPN_THROW_EXCEPTION("eval config error: " << eval.message);
         }
