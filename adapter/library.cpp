@@ -22,8 +22,8 @@ private:
     callbacks_delegate callbacks;
 
     virtual bool socket_protect(int socket) override {
-        LogMessage("Socket protect called (Noop)");
-        return true;
+        //defined in tunel builder delegate - called when external tunnel setup is used
+        return delegate_socket_protect(socket);
     }
 
     virtual void event(const ClientAPI::Event &ev) override {

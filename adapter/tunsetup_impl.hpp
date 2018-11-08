@@ -254,6 +254,13 @@ public :
         callbacks.teardown(callbacks.usrData, disconnect);
     }
 
+    // Socket protection mechanism delegating to tunnel setup callbacks
+    // Not a part of openvpn tunnel setup mechanism but usually called when external tunnel setup is used
+    bool delegate_socket_protect(int socket)
+    {
+        return callbacks.socket_protect(callbacks.usrData, socket);
+    }
+
 };
 
 #endif //CORE_TUNSETUP_IMPL_H
