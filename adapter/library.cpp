@@ -148,6 +148,11 @@ void cleanup_session(void *ptr) {
     Client::uninit_process();
 }
 
+void reconnect_session(void *ptr, int seconds) {
+    Client *client = (Client *)(ptr);
+    client->reconnect(seconds);
+}
+
 void check_library(user_callback_data userData, log_callback logCallback) {
     logCallback(userData, (char *)ClientAPI::OpenVPNClient::platform().c_str());
     logCallback(userData, (char *)ClientAPI::OpenVPNClient::copyright().c_str());
