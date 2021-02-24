@@ -132,9 +132,9 @@ namespace openvpn {
       if (eer && eer->enabled(ipv))
 	eer->emulate(tb, ipv, server_addr);
 
-      // configure redirect-gateway
-      if (!tb->tun_builder_reroute_gw(ipv.rgv4(), ipv.rgv6(), ipv.api_flags()))
-	throw tun_prop_route_error("tun_builder_reroute_gw for redirect-gateway failed");
+    //   // configure redirect-gateway
+    //   if (!tb->tun_builder_reroute_gw(ipv.rgv4(), ipv.rgv6(), ipv.api_flags()))
+	// throw tun_prop_route_error("tun_builder_reroute_gw for redirect-gateway failed");
 
       // add DNS servers and domain prefixes
       const unsigned int dhcp_option_flags = add_dhcp_options(tb, opt, quiet);

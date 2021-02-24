@@ -34,6 +34,8 @@
 #include <openvpn/common/rc.hpp>
 #include <openvpn/transport/protocol.hpp>
 
+#include "json/json.h"
+
 namespace openvpn {
   namespace ClientEvent {
     enum Type {
@@ -304,19 +306,31 @@ namespace openvpn {
 
       virtual std::string render() const
       {
-	std::ostringstream out;
+	// std::ostringstream out;
 	// eg. "godot@foo.bar.gov:443 (1.2.3.4) via TCPv4 on tun0/5.5.1.1"
-	if (!user.empty())
-	  out << user << '@';
-	if (server_host.find_first_of(':') == std::string::npos)
-	  out << server_host;
-	else
-	  out << '[' << server_host << ']';
-	out << ':' << server_port
-	    << " (" << server_ip << ") via " << client_ip << '/' << server_proto
-	    << " on " << tun_name << '/' << vpn_ip4 << '/' << vpn_ip6
-	    << " gw=[" << vpn_gw4 << '/' << vpn_gw6 << ']';
-	return out.str();
+	// if (!user.empty())
+	//   out << user << '@';
+	// if (server_host.find_first_of(':') == std::string::npos)
+	//   out << server_host;
+	// else {
+    Json::Value root(Json::objectValue);
+    
+    root["server_host"] = Json::Value(server_host);
+	  root["server_port"] = Json::Value(server_port);
+	  root["server_ip"] = Json::Value(server_ip);
+    root["client_ip"] = Json::Value(client_ip);
+    root["server_proto"] = Json::Value(server_proto);
+    root["tun_name "] = Json::Value(tun_name );
+    root["vpn_ip4"] = Json::Value(vpn_ip4);
+    root["vpn_ip6"] = Json::Value(vpn_ip6);
+    root["vpn_gw4 "] = Json::Value(vpn_gw4 );
+    root["vpn_gw6"] = Json::Value(vpn_gw6);
+
+    Json::StreamWriterBuilder builder;
+    return Json::writeString(builder, root);
+
+  // }
+	// return out.str();
       }
     };
 
