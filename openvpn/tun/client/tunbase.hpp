@@ -64,7 +64,7 @@ namespace openvpn {
 
     // progress notifications
     virtual void tun_pre_tun_config() = 0;
-    virtual void tun_pre_route_config() = 0;
+    virtual void tun_pre_route_config(std::string json) = 0;
     virtual void tun_connected() = 0;
   };
 

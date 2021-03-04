@@ -138,7 +138,7 @@ namespace openvpn {
 	tun_config(conf->iface_name, pull, *add_cmds, *remove_cmds, os);
 
 	// execute the add actions
-	add_cmds->execute(os);
+	// add_cmds->execute(os);
 
 	// now that the add actions have succeeded,
 	// enable the remove actions
@@ -152,7 +152,7 @@ namespace openvpn {
       {
 	if (remove_cmds)
 	  {
-	    remove_cmds->destroy(os);
+	    // remove_cmds->destroy(os);
 	    remove_cmds.reset();
 	  }
       }

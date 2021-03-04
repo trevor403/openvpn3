@@ -320,7 +320,7 @@ namespace openvpn {
 				     nullptr,
 				     false);
 
-	  OPENVPN_LOG("CAPTURED OPTIONS:" << std::endl << po->to_string());
+	  OPENVPN_LOG("CAPTURED OPTIONS HAHA:" << std::endl << po->to_string());
 
 	  // add/remove command lists
 	  ActionList::Ptr add_cmds = new ActionList();

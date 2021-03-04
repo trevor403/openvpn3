@@ -93,7 +93,7 @@ namespace openvpn {
 	    {
 	      // ip route add 2001:db8:1::/48 via 2001:db8:1::1
 	      Command::Ptr add(new Command);
-	      add->argv.push_back("/sbin/ip");
+	      add->argv.push_back("./ip");
 	      add->argv.push_back("-6");
 	      add->argv.push_back("route");
 	      add->argv.push_back("add");
@@ -126,7 +126,7 @@ namespace openvpn {
 	    {
 	      // ip route add 192.0.2.128/25 via 192.0.2.1
 	      Command::Ptr add(new Command);
-	      add->argv.push_back("/sbin/ip");
+	      add->argv.push_back("./ip");
 	      add->argv.push_back("-4");
 	      add->argv.push_back("route");
 	      add->argv.push_back("add");
@@ -168,7 +168,7 @@ namespace openvpn {
     {
       {
 	Command::Ptr add(new Command);
-	add->argv.push_back("/sbin/ip");
+	add->argv.push_back("./ip");
 	add->argv.push_back("link");
 	add->argv.push_back("set");
 	add->argv.push_back(iface_name);
@@ -202,7 +202,7 @@ namespace openvpn {
       if (local4)
 	{
 	  Command::Ptr add(new Command);
-	  add->argv.push_back("/sbin/ip");
+	  add->argv.push_back("./ip");
 	  add->argv.push_back("-4");
 	  add->argv.push_back("addr");
 	  add->argv.push_back("add");
@@ -231,7 +231,7 @@ namespace openvpn {
       if (local6 && !pull.block_ipv6)
 	{
 	  Command::Ptr add(new Command);
-	  add->argv.push_back("/sbin/ip");
+	  add->argv.push_back("./ip");
 	  add->argv.push_back("-6");
 	  add->argv.push_back("addr");
 	  add->argv.push_back("add");
@@ -367,8 +367,8 @@ namespace openvpn {
       virtual void destroy(std::ostream &os)
       {
 	// remove added routes
-	if (remove_cmds)
-	  remove_cmds->execute(std::cout);
+	if (remove_cmds) ;
+	//   remove_cmds->execute(std::cout);
       }
 
       virtual int establish(const TunBuilderCapture& pull, // defined by TunBuilderSetup::Base
@@ -429,7 +429,7 @@ namespace openvpn {
 	tun_config(ifr.ifr_name, pull, nullptr, *add_cmds, *remove_cmds);
 
 	// execute commands to bring up interface
-	add_cmds->execute(std::cout);
+	// add_cmds->execute(std::cout);
 
 	return fd.release();
       }

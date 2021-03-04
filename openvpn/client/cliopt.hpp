@@ -441,6 +441,14 @@ namespace openvpn {
 	  server_poll_timeout_ = parse_number_throw<unsigned int>(o->get(1, 16), "server-poll-timeout");
       }
 
+      // Get iproute command
+      {
+        const Option *o = opt.get_ptr("iproute");
+        if (o)
+          iproute_cmd = o->get_optional(1, 255);
+      }
+
+
       // create default creds object in case submit_creds is not called,
       // and populate it with embedded creds, if available
       {
@@ -836,6 +844,7 @@ namespace openvpn {
     ClientEvent::Queue::Ptr cli_events;
     ClientCreds::Ptr creds;
     unsigned int server_poll_timeout_;
+    std::string iproute_cmd;
     std::string server_override;
     std::string port_override;
     Protocol proto_override;

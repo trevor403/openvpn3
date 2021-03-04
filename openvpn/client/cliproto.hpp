@@ -694,9 +694,10 @@ namespace openvpn {
 	cli_events->add_event(std::move(ev));
       }
 
-      virtual void tun_pre_route_config()
+      virtual void tun_pre_route_config(std::string json)
       {
-	ClientEvent::Base::Ptr ev = new ClientEvent::AddRoutes();
+	ClientEvent::AddRoutes::Ptr ev = new ClientEvent::AddRoutes();
+	ev->json = json;
 	cli_events->add_event(std::move(ev));
       }
 

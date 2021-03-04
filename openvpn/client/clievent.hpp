@@ -231,7 +231,16 @@ namespace openvpn {
 
     struct AddRoutes : public Base
     {
+      typedef RCPtr<AddRoutes> Ptr;
+
       AddRoutes() : Base(ADD_ROUTES) {}
+
+      std::string json;
+
+      virtual std::string render() const
+      {
+        return json;
+      }
     };
 
     struct Resume : public Base

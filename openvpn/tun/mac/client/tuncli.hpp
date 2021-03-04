@@ -217,6 +217,7 @@ namespace openvpn {
 		    std::ostringstream os;
 		    auto os_print = Cleanup([&os](){ OPENVPN_LOG_STRING(os.str()); });
 		    fd = tun_setup->establish(*po, &tsconf, config->stop, os);
+			parent.tun_pre_route_config(po->to_json());
 		  }
 
 		  // create ASIO wrapper for tun fd
